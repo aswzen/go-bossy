@@ -4,14 +4,27 @@
 			"name" : "BIMA SIT",
 			"icon" : "JBoss",
 			"address" : "10.64.20.67",
-			"port" : "8080",
+			"port" : "9990",
+			"username" : "sigit",
+			"password" : "sigit",
 			"apiFetch" : ""
 		},
 		{
 			"name" : "BIMA DEV",
 			"icon" : "JBoss",
 			"address" : "10.64.20.128",
-			"port" : "8080",
+			"port" : "9990",
+			"username" : "sigit",
+			"password" : "sigit",
+			"apiFetch" : ""
+		},
+		{
+			"name" : "BIMA UAT",
+			"icon" : "JBoss",
+			"address" : "10.64.20.167",
+			"port" : "9990",
+			"username" : "sigit",
+			"password" : "sigit",
 			"apiFetch" : ""
 		}
 	]
