@@ -1,0 +1,18 @@
+{
+	"server" : [
+		{
+			"name" : "BIMA SIT",
+			"icon" : "JBoss",
+			"address" : "10.64.20.67",
+			"port" : "8080",
+			"apiFetch" : ""
+		},
+		{
+			"name" : "BIMA DEV",
+			"icon" : "JBoss",
+			"address" : "10.64.20.128",
+			"port" : "8080",
+			"apiFetch" : ""
+		}
+	]
+}
