@@ -63,13 +63,28 @@ func main() {
     		fmt.Println(v2)
     		nestedMap, _ := v2.(map[string]interface{})
 
-    		var url = nestedMap["address"].(string)+":"+nestedMap["port"].(string)
-
-    		fmt.Println(nestedMap["address"])
-    		fmt.Println(url)
+    		// fmt.Println(nestedMap["address"])
+    		// fmt.Println(url)
     		nestedMap["deploymentName"] = "TEST"
-    		nestedMap["serverVersion"] = getServerVersion(url, nestedMap["username"].(string), nestedMap["port"].(string));
-    		fmt.Println(nestedMap["address"])
+		 	var serverDet = getServerVersion(nestedMap["api"].(string), nestedMap["username"].(string),nestedMap["password"].(string));
+		    var result map[string]interface{}
+		    json.Unmarshal([]byte(serverDet), &result)
+
+		    var sap = []string{}
+    		deployments, _ := result["deployment"].(map[string]interface{})
+		    for _, v3 := range deployments { 
+		 		var lastDeploy = getLastDeployed(nestedMap["api"].(string)+"/deployment/"+v3.(string)+"?operation=attribute&name=enabled", nestedMap["username"].(string),nestedMap["password"].(string));
+		 		sap = append(lastDeploy, _);
+		    }
+
+    		// nestedMap["serverVersion"] = serverDet
+    		nestedMap["lastDeploy"] = sap
+    		nestedMap["deployment"] = result["deployment"]
+    		nestedMap["version"] = nil
+    		if result["product-name"] != nil {
+	    		nestedMap["version"] = result["product-name"].(string)+" - "+result["product-version"].(string)
+	    	}
+    		// fmt.Println(nestedMap["address"])
 		}
 
 		c.JSON(200, result["server"])
@@ -194,19 +209,19 @@ func getDigestAuthrization(digestParts map[string]string) string {
 func digestParts(resp *http.Response) map[string]string {
     result := map[string]string{}
     if len(resp.Header["Www-Authenticate"]) > 0 {
-        wantedHeaders := []string{"nonce", "Digest realm", "qop"}
+        wantedHeaders := []string{"nonce", "realm", "qop"}
         responseHeaders := strings.Split(resp.Header["Www-Authenticate"][0], ",")
         for _, r := range responseHeaders {
             for _, w := range wantedHeaders {
                 if strings.Contains(r, w) {
-    				// fmt.Println("strings :r ", r )
-                    var a = strings.Split(r, `"`)
-                    if(a[0] == ""){
+                    if(strings.Contains(r, `"`)){
+                    	var a = strings.Split(r, `"`)
                     	result[w] = a[1];
                     } else {
-                    	result[w] = a[0];
+                    	var b = strings.Split(r, `=`)
+                    	result[w] = b[1];
                     }
-    				fmt.Println("strings :r ", result[w] )
+					//fmt.Println("Fin >> ", w, result[w] )
                 }
             }
         }
@@ -214,9 +229,10 @@ func digestParts(resp *http.Response) map[string]string {
     return result
 }
 
-func getServerVersion(url string, username string, password string ) (version string){
-	url = "http://"+url+"/management";
-    fmt.Println("URL:>", url)
+func getAuth(url string, username string, password string ) (version string){
+
+	os.Setenv("HTTP_PROXY", "http://10.64.100.223:8080")
+	os.Setenv("HTTPS_PROXY", "http://10.64.100.223:8080")
 
     var query = []byte("")
     req, err := http.NewRequest("GET", url, bytes.NewBuffer(query))
@@ -228,30 +244,82 @@ func getServerVersion(url string, username string, password string ) (version st
     }
     defer resp.Body.Close()
 
+    fmt.Println("URL >> ", url)
+
+    fmt.Println("----------------Challenge Resp----------")
+    fmt.Println("RESP >> ",resp)
+
   	digestParts := digestParts(resp)
+
+
     // digestParts := map[string]string{}
-    digestParts["uri"] = url
+    digestParts["uri"] = "/management"
+    digestParts["domain"] = "/management"
     digestParts["method"] = "GET"
     digestParts["username"] = username
     digestParts["password"] = password
 
-    fmt.Println(digestParts)
+    fmt.Println("----------------Making Digest----------")
+    fmt.Println("Digest >> ",digestParts)
 
-    req, err = http.NewRequest("GET", url, bytes.NewBuffer(query))
-    req.Header.Set("Authorization", getDigestAuthrization(digestParts))
+    var digData = getDigestAuthrization(digestParts)
+    fmt.Println("Digest Compiled >> ",digData)
+    return digData;
+}
+
+func getServerVersion(url string, username string, password string ) (version string){
+	
+	os.Setenv("HTTP_PROXY", "http://10.64.100.223:8080")
+	os.Setenv("HTTPS_PROXY", "http://10.64.100.223:8080")
+
+    client := &http.Client{}	
+    var query = []byte("")
+    req, err := http.NewRequest("GET", url, bytes.NewBuffer(query))
+    req.Header.Set("Authorization", getAuth(url, username, password))
     req.Header.Set("Content-Type", "application/json")
 
-    resp, err = client.Do(req)
+    resp, err := client.Do(req)
     if err != nil {
         panic(err)
     }
     defer resp.Body.Close()
+    fmt.Println("----------------After Challenge----------")
+    fmt.Println(resp)
 
-    fmt.Println("response StatusCode :", resp.StatusCode )
-    fmt.Println("response Status:", resp.Status)
-    fmt.Println("response Headers:", resp.Header)
+    fmt.Println("StatusCode >> ", resp.StatusCode )
+    fmt.Println("Status >> ", resp.Status)
+    fmt.Println("Header >> ", resp.Header)
+    fmt.Println("-----------------------------\n\n\n")
     body, _ := ioutil.ReadAll(resp.Body)
-    fmt.Println("response Body:", string(body))
+    //fmt.Println("response Body:", string(body))
+    return string(body);
+}
+
+func getLastDeployed(url string, username string, password string ) (version string){
+	
+	os.Setenv("HTTP_PROXY", "http://10.64.100.223:8080")
+	os.Setenv("HTTPS_PROXY", "http://10.64.100.223:8080")
+
+    client := &http.Client{}
+    var query = []byte("")
+    req, err := http.NewRequest("GET", url, bytes.NewBuffer(query))
+    req.Header.Set("Authorization", getAuth(url, username, password))
+    req.Header.Set("Content-Type", "application/json")
+
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+    fmt.Println("----------------After Challenge----------")
+    fmt.Println(resp)
+
+    fmt.Println("StatusCode >> ", resp.StatusCode )
+    fmt.Println("Status >> ", resp.Status)
+    fmt.Println("Header >> ", resp.Header)
+    fmt.Println("-----------------------------\n\n\n")
+    body, _ := ioutil.ReadAll(resp.Body)
+    //fmt.Println("response Body:", string(body))
     return string(body);
 }
 

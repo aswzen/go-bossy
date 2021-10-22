@@ -5,27 +5,54 @@
 			"icon" : "JBoss",
 			"address" : "10.64.20.67",
 			"port" : "9990",
-			"username" : "sigit",
-			"password" : "sigit",
-			"apiFetch" : ""
+			"username" : "admin",
+			"password" : "admin123",
+			"api" : "http://10.64.20.67:9990/management"
 		},
 		{
-			"name" : "BIMA DEV",
+			"name" : "BIMA SIT 2",
 			"icon" : "JBoss",
-			"address" : "10.64.20.128",
+			"address" : "10.64.20.68",
 			"port" : "9990",
-			"username" : "sigit",
-			"password" : "sigit",
-			"apiFetch" : ""
+			"username" : "admin",
+			"password" : "admin123",
+			"api" : "http://10.64.20.68:9990/management"
 		},
 		{
 			"name" : "BIMA UAT",
 			"icon" : "JBoss",
 			"address" : "10.64.20.167",
 			"port" : "9990",
-			"username" : "sigit",
-			"password" : "sigit",
-			"apiFetch" : ""
+			"username" : "admin",
+			"password" : "admin123",
+			"api" : "http://10.64.20.167:9990/management"
+		},
+		{
+			"name" : "BIMA DEV",
+			"icon" : "JBoss",
+			"address" : "10.64.20.128",
+			"port" : "9990",
+			"username" : "tm",
+			"password" : "tm123",
+			"api" : "http://10.64.20.128:9990/management"
+		},
+		{
+			"name" : "BIMA DEV 2",
+			"icon" : "JBoss",
+			"address" : "10.64.20.173",
+			"port" : "9990",
+			"username" : "admin",
+			"password" : "admin123",
+			"api" : "http://10.64.20.173:9990/management"
+		},
+		{
+			"name" : "BIMA DEV 3",
+			"icon" : "JBoss",
+			"address" : "10.64.20.159",
+			"port" : "9990",
+			"username" : "admin",
+			"password" : "admin123",
+			"api" : "http://10.64.20.159:9990/management"
 		}
 	]
 }
